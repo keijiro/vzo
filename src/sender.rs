@@ -1,10 +1,12 @@
+mod custom;
+
 fn main() {
     let ctx = zmq::Context::new();
     let socket = ctx.socket(zmq::PUB).unwrap();
     socket.connect("tcp://localhost:5556").unwrap();
-    let data: [u8; 4] = [0xde, 0xad, 0xbe, 0xef];
+    let data = custom::CustomData { channel: 1, data1: 2, data2: 3 };
     loop {
-        socket.send(&data as &[u8], 0).unwrap();
+        socket.send(&data, 0).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(200));
     }
 }
