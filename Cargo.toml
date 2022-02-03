@@ -6,6 +6,12 @@ edition = "2021"
 
 [dependencies]
 zmq = "0.9.2"
+vst = { git = "https://github.com/rustaudio/vst-rs" }
+
+[lib]
+name = "plugin"
+path = "src/plugin.rs"
+crate-type = ["cdylib"]
 
 [[bin]]
 name = "sender"
