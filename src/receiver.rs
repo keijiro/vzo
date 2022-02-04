@@ -8,6 +8,6 @@ fn main() {
     loop {
         let msg = socket.recv_msg(0).unwrap();
         let data = custom::CustomData::from(&msg);
-        println!("{:x} {:x} {:x}", data.channel, data.data1, data.data2);
+        println!("{:x} {:x} {:x} {:x}", data.channel, data.event, data.data1, data.data2);
     }
 }
