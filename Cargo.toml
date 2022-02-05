@@ -5,7 +5,9 @@ authors = ["Keijiro Takahashi <keijiro@gmail.com>"]
 edition = "2021"
 
 [dependencies]
+rand = "0.8.4"
 zmq = "0.9.2"
+rosc = "0.6.0"
 vst = { git = "https://github.com/rustaudio/vst-rs" }
 
 [lib]

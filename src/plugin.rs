@@ -1,5 +1,3 @@
-mod custom;
-
 #[macro_use]
 extern crate vst;
 
@@ -10,40 +8,68 @@ use vst::util::AtomicFloat;
 
 use std::sync::Arc;
 
-struct OSCBridge {
-    params: Arc<OSCBridgeParameters>,
+struct OscBridge {
+    params: Arc<OscBridgeParameters>,
     socket: zmq::Socket,
 }
 
-struct OSCBridgeParameters {
+impl OscBridge {
+    fn process_midi_event(&mut self, data: [u8; 3]) {
+        let ch = self.params.get_channel_number();
+        let ev = data[0] & 0xf0;
+        let note = data[1];
+        let mut vel = data[2];
+
+        if ev == 0x80 {
+            // pass
+        }
+        else if ev == 0x90 {
+            vel = 0;
+        }
+        else {
+            return;
+        }
+
+        let addr = format!("/note/{}/{}", ch, note);
+        let value = format!("{}", vel);
+
+        self.socket.send_multipart(vec![&addr, &value], 0).unwrap();
+    }
+}
+
+struct OscBridgeParameters {
     channel: AtomicFloat,
 }
 
-impl Default for OSCBridgeParameters {
-    fn default() -> OSCBridgeParameters {
-        OSCBridgeParameters {
+impl OscBridgeParameters {
+    fn get_channel_number(&self) -> i32 {
+        (self.channel.get() * 255.0) as i32
+    }
+}
+
+impl Default for OscBridgeParameters {
+    fn default() -> OscBridgeParameters {
+        OscBridgeParameters {
             channel: AtomicFloat::new(0.0),
         }
     }
 }
 
-plugin_main!(OSCBridge);
-
-impl Plugin for OSCBridge {
+impl Plugin for OscBridge {
     fn new(_host: HostCallback) -> Self {
-        OSCBridge {
-            params: Arc::new(OSCBridgeParameters::default()),
+        OscBridge {
+            params: Arc::new(OscBridgeParameters::default()),
             socket: {
-                let socket = zmq::Context::new().socket(zmq::PUB).unwrap();
-                socket.connect("tcp://localhost:5556").unwrap();
-                socket
+                let sock = zmq::Context::new().socket(zmq::PUB).unwrap();
+                sock.connect("tcp://localhost:9001").unwrap();
+                sock
             },
         }
     }
 
     fn get_info(&self) -> Info {
         Info {
-            name: "OSCBridge".to_string(),
+            name: "OscBridge".to_string(),
             vendor: "Keijiro".to_string(),
             unique_id: 362785,
             category: Category::Synth,
@@ -55,11 +81,7 @@ impl Plugin for OSCBridge {
     fn process_events(&mut self, events: &api::Events) {
         for event in events.events() {
             match event {
-                event::Event::Midi(ev) => {
-                    let data = custom::CustomData
-                      { channel:(self.params.channel.get() * 127.0) as u8, event: ev.data[0], data1: ev.data[1], data2: ev.data[2] };
-                    self.socket.send(&data, 0).unwrap();
-                },
+                event::Event::Midi(ev) => self.process_midi_event(ev.data),
                 _ => ()
             }
         }
@@ -77,7 +99,7 @@ impl Plugin for OSCBridge {
     }
 }
 
-impl PluginParameters for OSCBridgeParameters {
+impl PluginParameters for OscBridgeParameters {
     fn get_parameter(&self, index: i32) -> f32 {
         match index {
             0 => self.channel.get(),
@@ -95,7 +117,7 @@ impl PluginParameters for OSCBridgeParameters {
 
     fn get_parameter_text(&self, index: i32) -> String {
         match index {
-            0 => format!("{}", (self.channel.get() * 127.0) as i32),
+            0 => format!("{}", self.get_channel_number()),
             _ => "".to_string(),
         }
     }
@@ -108,3 +130,5 @@ impl PluginParameters for OSCBridgeParameters {
         .to_string()
     }
 }
+
+plugin_main!(OscBridge);

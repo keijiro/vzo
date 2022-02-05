@@ -1,13 +1,25 @@
-mod custom;
+use rosc::{OscMessage, OscPacket, OscType};
+use std::net::UdpSocket;
+use std::str;
 
 fn main() {
-    let ctx = zmq::Context::new();
-    let socket = ctx.socket(zmq::SUB).unwrap();
-    socket.set_subscribe(b"").unwrap();
-    socket.bind("tcp://*:5556").unwrap();
+    let recv_sock = zmq::Context::new().socket(zmq::SUB).unwrap();
+    recv_sock.set_subscribe(b"").unwrap();
+    recv_sock.bind("tcp://*:9001").unwrap();
+
+    let send_sock = UdpSocket::bind("0.0.0.0:0").unwrap();
+
     loop {
-        let msg = socket.recv_msg(0).unwrap();
-        let data = custom::CustomData::from(&msg);
-        println!("{:x} {:x} {:x} {:x}", data.channel, data.event, data.data1, data.data2);
+        let recv_msg = recv_sock.recv_multipart(0).unwrap();
+        let addr = str::from_utf8(&recv_msg[0]).unwrap().to_string();
+        let value = str::from_utf8(&recv_msg[1]).unwrap().parse::<f32>().unwrap();
+
+        println!("{} {}", addr, value);
+
+        let osc_msg = OscMessage { addr: addr, args: vec![OscType::Float(value)] };
+        let osc_pak = OscPacket::Message(osc_msg);
+        let send_msg = rosc::encoder::encode(&osc_pak).unwrap();
+
+        send_sock.send_to(&send_msg, "127.0.0.1:9000").unwrap();
     }
 }
