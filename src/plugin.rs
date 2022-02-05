@@ -1,8 +1,7 @@
 #[macro_use]
 extern crate vst;
 
-use vst::api;
-use vst::event;
+use vst::{api, event};
 use vst::plugin::{CanDo, Category, HostCallback, Info, Plugin, PluginParameters};
 use vst::util::AtomicFloat;
 
@@ -15,23 +14,17 @@ struct OscBridge {
 
 impl OscBridge {
     fn process_midi_event(&mut self, data: [u8; 3]) {
-        let ch = self.params.get_channel_number();
-        let ev = data[0] & 0xf0;
-        let note = data[1];
-        let mut vel = data[2];
+        let channel = self.params.get_channel_number();
 
-        if ev == 0x80 {
-            // pass
-        }
-        else if ev == 0x90 {
-            vel = 0;
-        }
-        else {
-            return;
-        }
+        let (kind, level) = match data[0] & 0xf0 {
+            0x80 => ("note", data[2]),
+            0x90 => ("note", 0),
+            0xb0 => ("cc", data[2]),
+            _ => { return },
+        };
 
-        let addr = format!("/note/{}/{}", ch, note);
-        let value = format!("{}", vel);
+        let addr = format!("/{}/{}/{}", kind, channel, data[1]);
+        let value = format!("{}", level);
 
         self.socket.send_multipart(vec![&addr, &value], 0).unwrap();
     }
@@ -108,7 +101,6 @@ impl PluginParameters for OscBridgeParameters {
     }
 
     fn set_parameter(&self, index: i32, val: f32) {
-        #[allow(clippy::single_match)]
         match index {
             0 => self.channel.set(val),
             _ => (),
