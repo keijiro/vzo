@@ -5,7 +5,7 @@ use std::str;
 fn main() {
     let recv_sock = zmq::Context::new().socket(zmq::SUB).unwrap();
     recv_sock.set_subscribe(b"").unwrap();
-    recv_sock.bind("tcp://*:9001").unwrap();
+    recv_sock.bind("tcp://*:53311").unwrap();
 
     let send_sock = UdpSocket::bind("0.0.0.0:0").unwrap();
 

@@ -54,7 +54,7 @@ impl Plugin for OscBridge {
             params: Arc::new(OscBridgeParameters::default()),
             socket: {
                 let sock = zmq::Context::new().socket(zmq::PUB).unwrap();
-                sock.connect("tcp://localhost:9001").unwrap();
+                sock.connect("tcp://127.0.0.1:53311").unwrap();
                 sock
             },
         }
