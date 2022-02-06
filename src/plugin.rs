@@ -17,14 +17,14 @@ impl OscBridge {
         let channel = self.params.get_channel_number();
 
         let (kind, level) = match data[0] & 0xf0 {
-            0x80 => ("note", data[2]),
-            0x90 => ("note", 0),
+            0x80 => ("note", 0),
+            0x90 => ("note", data[2]),
             0xb0 => ("cc", data[2]),
             _ => { return },
         };
 
         let addr = format!("/{}/{}/{}", kind, channel, data[1]);
-        let value = format!("{}", level);
+        let value = format!("{}", (level as f32) / 127.0);
 
         self.socket.send_multipart(vec![&addr, &value], 0).unwrap();
     }
