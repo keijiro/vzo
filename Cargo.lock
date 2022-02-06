@@ -256,16 +256,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust-zmq-test"
-version = "0.1.0"
-dependencies = [
- "rand",
- "rosc",
- "vst",
- "zmq",
-]
-
-[[package]]
 name = "serde"
 version = "1.0.136"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -340,6 +330,16 @@ dependencies = [
  "log",
  "num-traits",
  "num_enum",
+]
+
+[[package]]
+name = "vzo"
+version = "0.1.0"
+dependencies = [
+ "rand",
+ "rosc",
+ "vst",
+ "zmq",
 ]
 
 [[package]]

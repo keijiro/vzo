@@ -1,5 +1,9 @@
 #!/bin/sh
+
+VST_DIR=${HOME}"/Library/Audio/Plug-Ins/VST"
+
 cargo build --release
-./osx_vst_bundler.sh OSCBridge target/release/libplugin.dylib
-rm -r ~/Library/Audio/Plug-Ins/VST/OSCBridge.vst
-cp -r OSCBridge.vst ~/Library/Audio/Plug-Ins/VST
+./osx_vst_bundler.sh vzo target/release/libplugin.dylib
+
+[ -e ${VST_DIR}/vzo.vst ] && rm -r ${VST_DIR}/vzo.vst
+cp -r vzo.vst ${VST_DIR}

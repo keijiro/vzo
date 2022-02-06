@@ -1,5 +1,5 @@
 [package]
-name = "rust-zmq-test"
+name = "vzo"
 version = "0.1.0"
 authors = ["Keijiro Takahashi <keijiro@gmail.com>"]
 edition = "2021"
@@ -16,9 +16,5 @@ path = "src/plugin.rs"
 crate-type = ["cdylib"]
 
 [[bin]]
-name = "sender"
-path = "src/sender.rs"
-
-[[bin]]
-name = "receiver"
-path = "src/receiver.rs"
+name = "bridge"
+path = "src/bridge.rs"
