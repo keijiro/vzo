@@ -16,13 +16,17 @@ fn main() {
     let send_addr = get_destination_addr();
 
     println!("Started routing messages to {}", send_addr);
+    println!("Waiting for a connection.");
+
+    let term = console::Term::stdout();
 
     loop {
         let recv_msg = recv_sock.recv_multipart(0).unwrap();
         let addr = str::from_utf8(&recv_msg[0]).unwrap().to_string();
         let value = str::from_utf8(&recv_msg[1]).unwrap().parse::<f32>().unwrap();
 
-        println!("{} {}", addr, value);
+        term.clear_last_lines(1).unwrap();
+        term.write_line(&format!("{} {}", addr, value)).unwrap();
 
         let osc_msg = OscMessage { addr: addr, args: vec![OscType::Float(value)] };
         let osc_pak = OscPacket::Message(osc_msg);
