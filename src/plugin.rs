@@ -7,12 +7,12 @@ use vst::util::AtomicFloat;
 
 use std::sync::Arc;
 
-struct OscBridge {
-    params: Arc<OscBridgeParameters>,
+struct VzoPlugin {
+    params: Arc<VzoParameters>,
     socket: zmq::Socket,
 }
 
-impl OscBridge {
+impl VzoPlugin {
     fn process_midi_event(&mut self, data: [u8; 3]) {
         let channel = self.params.get_channel_number();
 
@@ -30,28 +30,28 @@ impl OscBridge {
     }
 }
 
-struct OscBridgeParameters {
+struct VzoParameters {
     channel: AtomicFloat,
 }
 
-impl OscBridgeParameters {
+impl VzoParameters {
     fn get_channel_number(&self) -> i32 {
         (self.channel.get() * 255.0) as i32
     }
 }
 
-impl Default for OscBridgeParameters {
-    fn default() -> OscBridgeParameters {
-        OscBridgeParameters {
+impl Default for VzoParameters {
+    fn default() -> VzoParameters {
+        VzoParameters {
             channel: AtomicFloat::new(0.0),
         }
     }
 }
 
-impl Plugin for OscBridge {
+impl Plugin for VzoPlugin {
     fn new(_host: HostCallback) -> Self {
-        OscBridge {
-            params: Arc::new(OscBridgeParameters::default()),
+        VzoPlugin {
+            params: Arc::new(VzoParameters::default()),
             socket: {
                 let sock = zmq::Context::new().socket(zmq::PUB).unwrap();
                 sock.connect("tcp://127.0.0.1:53311").unwrap();
@@ -62,7 +62,7 @@ impl Plugin for OscBridge {
 
     fn get_info(&self) -> Info {
         Info {
-            name: "OscBridge".to_string(),
+            name: "vzo".to_string(),
             vendor: "Keijiro".to_string(),
             unique_id: 362785,
             category: Category::Synth,
@@ -92,7 +92,7 @@ impl Plugin for OscBridge {
     }
 }
 
-impl PluginParameters for OscBridgeParameters {
+impl PluginParameters for VzoParameters {
     fn get_parameter(&self, index: i32) -> f32 {
         match index {
             0 => self.channel.get(),
@@ -123,4 +123,4 @@ impl PluginParameters for OscBridgeParameters {
     }
 }
 
-plugin_main!(OscBridge);
+plugin_main!(VzoPlugin);
