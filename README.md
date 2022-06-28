@@ -58,4 +58,6 @@ check the velocity value on the receiver side.
 Related Projects
 ----------------
 
-- VzoVfx: Unity package to control VFX by VZO messages.
+- [VzoVfx]: Unity package to control VFX by VZO messages.
+
+[VzoVfx]: https://github.com/keijiro/VzoVfx
