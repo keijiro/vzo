@@ -55,6 +55,17 @@ check the velocity value on the receiver side.
 - Address pattern: ```/note/{channel}/{CC#}```
 - Attached data: float (CC value)
 
+FAQ
+---
+
+### An error dialog shows up. It says “vzo.vst is damaged and can’t be opened."
+
+You can remove the quarantine attribute using the command line:
+
+```
+xattr -dr com.apple.quarantine vzo.vst
+```
+
 Related Projects
 ----------------
 
